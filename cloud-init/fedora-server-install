@@ -1,0 +1,48 @@
+1. create a user-data batch file for cloud-init installation.
+vi /srv/www/fedora/user-data
+#cloud-config
+# user: admin, password: admin
+system_info:
+  default_user:
+    name: "admin"
+    plain_text_passwd: "admin"
+    lock_passwd: false
+    groups: ["wheel"]
+    
+
+2. Download Fedora server LIVE from https://download.fedoraproject.org/pub/fedora/linux/releases/36/Cloud/x86_64/images/Fedora-Cloud-Base-36-1.5.x86_64.qcow2
+
+3. move and rename the QCOW image file to something simple, i.e vmdisk.qcow2
+mkdir ~/VMs/
+cd VMs/
+mv ~/Downloads/Fedora-Cloud-Base-36-1.5.x86_64.qcow2 vmdisk.qcow2
+
+4. execute installation
+virt-install   \
+--name fedora-server-36   \
+--memory 2048   \
+--vcpus 2   \
+--graphics none   \
+--os-variant detect=on   \
+--import   \
+--disk vmdisk.qcow2,size=20  \
+--console pty,target_type=virtio   \
+--serial pty \
+--cloud-init user-data=/srv/www/fedora/user-data
+
+at the end installation, you will served login prompt:
+[    8.636926] cloud-init[764]: Cloud-init v. 22.1 running 'modules:final' at Tue, 09 Aug 2022 22:02:29 +0000. Up 8.60 seconds.
+[    8.673570] cloud-init[764]: Cloud-init v. 22.1 finished at Tue, 09 Aug 2022 22:02:29 +0000. Datasource DataSourceNoCloud [seed=/dev/sr0][dsmode=net].  Up 8.67 seconds
+[  OK  ] Finished cloud-final.servi… Execute cloud user/final scripts.
+[  OK  ] Reached target cloud-init.target - Cloud-init target.
+
+Fedora Linux 36 (Cloud Edition)
+Kernel 5.17.5-300.fc36.x86_64 on an x86_64 (ttyS0)
+
+fedora login: admin
+Password:
+Last login: Tue Aug  9 22:00:53 on ttyS0
+[admin@fedora ~]$ 
+
+5. you may login with credential set in step-1, and use sudo for administrative tasks.
+[admin@fedora ~]$ sudo shutdown -h now
